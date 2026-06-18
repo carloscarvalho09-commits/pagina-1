@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disputa de Pênaltis</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: #1e3a1e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+            color: #facc15;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .placar {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+
+        .campo {
+            position: relative;
+            width: 400px;
+            height: 250px;
+            background: #2e7d32;
+            border: 4px solid #fff;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .trave {
+            position: absolute;
+            top: 40px;
+            width: 260px;
+            height: 120px;
+            border: 5px solid #fff;
+            border-bottom: none;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .goleiro {
+            position: absolute;
+            bottom: 0;
+            left: 110px;
+            width: 40px;
+            height: 60px;
+            background: #e11d48;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.4s ease;
+        }
+
+        .bola {
+            position: absolute;
+            bottom: 20px;
+            left: 185px;
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+            border: 2px solid #000;
+            transition: all 0.5s ease-in;
+        }
+
+        .controles {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-chute {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            background: #facc15;
+            color: #1e3a1e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .btn-chute:hover {
+            background: #fef08a;
+        }
+
+        .btn-chute:active {
+            transform: scale(0.95);
+        }
+
+        .resultado {
+            margin-top: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            height: 30px;
+            color: #fef08a;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Cobrança de Pênalti</h1>
+    <div class="placar">Gols: <span id="gols">0</span> | Defesas: <span id="defesas">0</span></div>
+
+    <div class="campo">
+        <div class="trave"></div>
+        <div class="goleiro" id="goleiro"></div>
+        <div class="bola" id="bola"></div>
+    </div>
+
+    <div class="resultado" id="resultado">Escolha um canto para chutar!</div>
+
+    <div class="controles">
+        <button class="btn-chute" onclick="chutar('esquerda')">Esquerda</button>
+        <button class="btn-chute" onclick="chutar('centro')">Centro</button>
+        <button class="btn-chute" onclick="chutar('direita')">Direita</button>
+    </div>
+
+    <script>
+        let gols = 0;
+        let defesas = 0;
+        let jogando = true;
+
+        const bola = document.getElementById('bola');
+        const goleiro = document.getElementById('goleiro');
+        const resultado = document.getElementById('resultado');
+        const golsPlacar = document.getElementById('gols');
+        const defesasPlacar = document.getElementById('defesas');
+
+        // Posições visuais no CSS para onde a bola/goleiro vão
+        const posicoes = {
+            'esquerda': { bolaLeft: '90px', golLeft: '80px' },
+            'centro': { bolaLeft: '185px', golLeft: '110px' },
+            'direita': { bolaLeft: '280px', golLeft: '140px' }
+        };
+
+        function chutar(cantoEscolhido) {
+            if (!jogando) return;
+            jogando = false;
+
+            // O goleiro escolhe um canto aleatório
+            const cantos = ['esquerda', 'centro', 'direita'];
+            const cantoGoleiro = cantos[Math.floor(Math.random() * cantos.length)];
+
+            // Animação do Goleiro
+            goleiro.style.left = posicoes[cantoGoleiro].golLeft;
+            
+            // Animação da Bola (sobe para o gol)
+            bola.style.bottom = '140px';
+            bola.style.left = posicoes[cantoEscolhido].bolaLeft;
+            bola.style.transform = 'scale(0.6) rotate(360deg)';
+
+            // Verifica o resultado após o término da animação
+            setTimeout(() => {
+                if (cantoEscolhido === cantoGoleiro) {
+                    resultado.innerText = "DEFENDEU O GOLEIRO! 🧤";
+                    defesas++;
+                    defesasPlacar.innerText = defesas;
+                } else {
+                    resultado.innerText = "GOOOOOL!! ⚽🥅";
+                    gols++;
+                    golsPlacar.innerText = gols;
+                }
+
+                // Reseta a jogada após 2 segundos para o próximo chute
+                setTimeout(resetarPosicoes, 2000);
+            }, 500);
+        }
+
+        function resetarPosicoes() {
+            bola.style.bottom = '20px';
+            bola.style.left = '185px';
+            bola.style.transform = 'scale(1) rotate(0deg)';
+            goleiro.style.left = '110px';
+            resultado.innerText = "Escolha um canto para chutar!";
+            jogando = true;
+        }
+    </script>
+</body>
+</html>
